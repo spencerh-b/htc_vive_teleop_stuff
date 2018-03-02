@@ -25,7 +25,7 @@ Then check out and fake-compile (it's all Python) this repository in your catkin
 ```bash
 mkdir -p vive_ws/src
 cd vive_ws/src
-git clone https://github.com/uts-magic-lab/htc_vive_teleop_stuff
+git clone https://github.com/spencerh-b/htc_vive_teleop_stuff
 cd ..
 catkin_make
 source devel/setup.bash
