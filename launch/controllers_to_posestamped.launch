@@ -7,4 +7,8 @@
     pkg="htc_vive_teleop_stuff" 
     type="frame_as_posestamped.py"
     args="right_controller lighthouse_0 30"/>
+  <node name="hmd_ps" 
+    pkg="htc_vive_teleop_stuff" 
+    type="frame_as_posestamped.py"
+    args="hmd lighthouse_0 30"/>
 </launch>
