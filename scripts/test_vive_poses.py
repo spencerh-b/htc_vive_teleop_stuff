@@ -14,25 +14,22 @@ Author: Spencer Barclay <Spencer.Barclay at wsu.edu>
 
 
 class PublishPoseStamped(object):
-    def __init__(self, frame_to_posestamped,
-                 reference_frame,
+    def __init__(self, posestamped_name,
                  rate,
                  verbose=False):
         """
         Class to publish a frame as a PoseStamped.
-        :param frame_to_posestamped str: frame that will be published its
+        :param posestamped str: frame that will be published its
                 pose as PoseStamped.
-        :param reference_frame str: frame that will be the header.frame_id
-                of the PoseStamped.
+        :
         :param rate int: rate at which to compute and publish the pose.
         :param verbose bool: print to screen the transformations.
         """
-        self.tf_l = tf.TransformListener()
-        topic_name = frame_to_posestamped.replace('/', '')
+        self.tf_lp = tf.TransformListener()
+        topic_name = posestamped_name.replace('/', '')
         self.pose_pub = rospy.Publisher(topic_name + '_pose',
                                         PoseStamped, queue_size=1)
-        self.frame_to_posestamped = frame_to_posestamped
-        self.reference_frame = reference_frame
+        self.posestamped_name = posestamped_name
         self.rate = rospy.Rate(rate)
         self.verbose = verbose
 
@@ -55,7 +52,7 @@ class PublishPoseStamped(object):
         last_warn = rospy.Time.now() - min_time_in_between_warns
         while not transform_ok and not rospy.is_shutdown():
             try:
-                target_ps = self.tf_l.transformPose(to_frame, ps)
+                target_ps = self.tf_lp.transformPose(from_frame, ps)
                 transform_ok = True
             except tf.ExtrapolationException as e:
                 if rospy.Time.now() > (last_warn + min_time_in_between_warns):
@@ -64,8 +61,8 @@ class PublishPoseStamped(object):
                         str(e) + ")")
                     last_warn = rospy.Time.now()
                 rospy.sleep(0.2)
-                ps.header.stamp = self.tf_l.getLatestCommonTime(
-                    from_frame, to_frame)
+                ps.header.stamp = self.tf_lp.getLatestCommonTime(
+                    from_frame)
             except tf.LookupException as e:
                 if rospy.Time.now() > (last_warn + min_time_in_between_warns):
                     rospy.logwarn(
@@ -85,9 +82,8 @@ class PublishPoseStamped(object):
             # self.frame_to_posestamped
             # which is 0.0, 0.0, 0.0
             # to the reference frame to get it's pose
-            tfed_ps = self.transform_pose(ps,
-                                          self.frame_to_posestamped,
-                                          self.reference_frame)
+            tfed_ps = self.pub_poses(ps,
+                                    self.posestamped_name,)
             self.pose_pub.publish(tfed_ps)
             if self.verbose:
                 print(tfed_ps)
@@ -95,20 +91,10 @@ class PublishPoseStamped(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node('pose_to_posestamped')
+    rospy.init_node('cah_posestamped')
     argv = rospy.myargv(sys.argv)
-    if len(argv) < 3:
-        print("Usage:")
-        print(argv[0] + " pose_to_posestamped reference_frame [rate]")
-        exit(0)
-    frame_to_posestamped = argv[1]
-    reference_frame = argv[2]
-    if len(argv) == 4:
-        rate = int(argv[3])
-    else:
-        rate = 10
-    pfaps = PublishFrameAsPoseStamped(frame_to_posestamped,
-                                      reference_frame,
-                                      rate,
-                                      verbose=False)
-    pfaps.run()
+    posestamped = argv[1]
+    cahps = PublishPoseStamped(posestamped,
+                               10,
+                               verbose=False)
+    cahps.run()
