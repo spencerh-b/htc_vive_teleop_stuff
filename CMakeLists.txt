@@ -23,7 +23,6 @@ catkin_package()
 install(PROGRAMS
   scripts/vive_tf_and_joy.py
   scripts/frame_as_posestamped.py
-  scripts/vive_poses.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
